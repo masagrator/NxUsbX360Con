@@ -1,5 +1,5 @@
 /*
- * SwitchInputClient  v1.0.0
+ * NxUsbX360Con  v1.0.0
  * ──────────────────────────────────────────────────────────────────────────
  * Nintendo Switch homebrew that reads the default gamepad and streams
  * 18-byte input packets over USB to a connected Windows PC.
@@ -78,7 +78,7 @@ static void draw_header(void)
 {
     printf("\033[2J\033[H"); /* clear + home */
     printf("--------------------------------------------\n");
-    printf("|      SwitchInputClient   v1.0.0          |\n");
+    printf("|      NxUsbX360Con   v1.0.0               |\n");
     printf("|      USB -> XInput Bridge                |\n");
     printf("--------------------------------------------\n\n");
 }
