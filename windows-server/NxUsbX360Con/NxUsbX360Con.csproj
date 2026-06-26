@@ -16,6 +16,7 @@
     <Version>1.0.0</Version>
     <Authors>MasaGratoR + Claude</Authors>
     <Description>Streams Nintendo Switch input over USB and emulates an Xbox 360 controller via ViGEmBus.</Description>
+    <PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <ItemGroup>
