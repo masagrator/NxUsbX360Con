@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------------------
-# SwitchInputClient — devkitPro / libnx Makefile
+# NxUsbX360Con — devkitPro / libnx Makefile
 # Based on the official libnx template (devkitPro/switch-examples).
 #---------------------------------------------------------------------------------
 .SUFFIXES:
