@@ -5,11 +5,13 @@ Send Nintendo Switch controller input over USB to a Windows PC, emulating an Xbo
 This was made as an alternative to using Joycons on Windows via Bluetooth. Every native solutions I tested resulted in input lag on one of joycons. My solution has no visible input lag.
 Technically it should support also pro controller and any other controller that Switch detects as Joycon/Pro Controller, but were not tested.
 
+Jailbroken Nintendo Switch is required.
+
 ## How to use it:
 - If you didn't install libusbK driver before:
   - Download [Zadig](https://zadig.akeo.ie/)
   - Connect your Nintendo Switch
-  - Run NxUsbX360Con homebrew on Nitendo Switch, connect it to PC
+  - Run NxUsbX360Con homebrew on Nintendo Switch, connect it to PC
   - Launch Zadig
   - From listed devices find the device "Nintendo Switch", with USB ID 057E 3000
   - Change driver from WinUSB to libusbK
