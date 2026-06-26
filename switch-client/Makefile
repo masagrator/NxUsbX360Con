@@ -23,8 +23,8 @@ INCLUDES    := include
 EXEFS_SRC   := exefs_src
 ROMFS       :=
 
-APP_TITLE   := Switch Input Client
-APP_AUTHOR  := InputBridge Project
+APP_TITLE   := NxUsbX360Con
+APP_AUTHOR  := MasaGratoR
 APP_VERSION := 1.0.0
 
 # Set NO_ICON to avoid requiring an icon.jpg.
