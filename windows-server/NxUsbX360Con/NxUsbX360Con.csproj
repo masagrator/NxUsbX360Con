@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>NxUsbX360Con</AssemblyName>
+    <RootNamespace>NxUsbX360Con</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>13.0</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>x64</Platforms>
+    <Optimize Condition="'$(Configuration)'=='Release'">true</Optimize>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Version>1.0.0</Version>
+    <Authors>MasaGratoR + Claude</Authors>
+    <Description>Streams Nintendo Switch input over USB and emulates an Xbox 360 controller via ViGEmBus.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Main library: 3.0.224 has the correct managed API but ships without the native DLL. -->
+    <PackageReference Include="LibUsbDotNet" Version="3.0.224" />
+    <!-- Download-only: 3.0.167-alpha ships the native win-x64 libusb-1.0.dll.
+         PackageDownload = downloaded to the NuGet cache on restore, NOT added as a reference. -->
+    <PackageDownload Include="LibUsbDotNet" Version="[3.0.167-alpha]" />
+    <PackageReference Include="Nefarius.ViGEm.Client" Version="1.21.256" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!--
+    After restore, copy libusb-1.0.dll from the 3.0.167-alpha NuGet cache entry
+    into the build output.  The stable 3.0.224 omits this DLL; the alpha has it
+    and it is ABI-compatible.
+  -->
+  <Target Name="CopyNativeLibUsb" BeforeTargets="Build">
+    <PropertyGroup>
+      <_LibUsbSrc>$(NuGetPackageRoot)libusbdotnet/3.0.167-alpha/runtimes/win-x64/native/libusb-1.0.dll</_LibUsbSrc>
+      <_LibUsbDst>$(OutputPath)libusb-1.0.dll</_LibUsbDst>
+    </PropertyGroup>
+
+    <Copy
+      SourceFiles="$(_LibUsbSrc)"
+      DestinationFiles="$(_LibUsbDst)"
+      SkipUnchangedFiles="true"
+      Condition="Exists('$(_LibUsbSrc)')" />
+
+    <Warning
+      Condition="!Exists('$(_LibUsbSrc)')"
+      Text="libusb-1.0.dll not found at $(_LibUsbSrc) — run 'dotnet restore' first, then rebuild." />
+  </Target>
+
+</Project>
