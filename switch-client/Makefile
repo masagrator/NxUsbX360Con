@@ -15,7 +15,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 # Project metadata
 #---------------------------------------------------------------------------------
-TARGET      := SwitchInputClient
+TARGET      := NxUsbX360Con
 BUILD       := build
 SOURCES     := source
 DATA        := data
