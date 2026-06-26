@@ -2,7 +2,7 @@
 
 Send Nintendo Switch controller input over USB to a Windows PC, emulating an Xbox 360 controller via the ViGEmBus driver.
 
-This was made as an alternative to using Joycons on Windows via Bluetooth. Every native solutions I tested resulted in input lag on one of joycons. My solution has no visible input lag.
+This was made as an alternative to using Joycons on Windows via Bluetooth. Every native solutions I tested resulted in big input lag on one of joycons. My solution has no visible input lag outside of joycon lag.
 Technically it should support also pro controller and any other controller that Switch detects as Joycon/Pro Controller, but were not tested.
 
 Jailbroken Nintendo Switch is required.
