@@ -1,4 +1,4 @@
-# SwitchInputBridge
+# NxUsbX360Con
 
 Send Nintendo Switch controller input over USB to a Windows PC, emulating an Xbox 360 controller via the ViGEmBus driver.
 
@@ -166,7 +166,7 @@ Open any game or tool that reads XInput / Xbox controllers — the Switch pad no
 ## Project layout
 
 ```
-SwitchInputBridge/
+NxUsbX360Con/
 ├── README.md
 ├── switch-client/
 │   ├── Makefile
