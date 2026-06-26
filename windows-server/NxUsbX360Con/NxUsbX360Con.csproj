@@ -16,7 +16,9 @@
     <Version>1.0.0</Version>
     <Authors>MasaGratoR + Claude</Authors>
     <Description>Streams Nintendo Switch input over USB and emulates an Xbox 360 controller via ViGEmBus.</Description>
-    <PublishAot>true</PublishAot>
+	<PublishAot>true</PublishAot>
+	<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+	<JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
 
   <ItemGroup>
@@ -55,5 +57,6 @@
       Condition="!Exists('$(_LibUsbSrc)')"
       Text="libusb-1.0.dll not found at $(_LibUsbSrc) — run 'dotnet restore' first, then rebuild." />
   </Target>
+  
 
 </Project>

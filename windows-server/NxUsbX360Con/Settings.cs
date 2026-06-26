@@ -1,5 +1,15 @@
 namespace SwitchInputServer;
 
+// Tell the AOT compiler to generate serialization code for AppSettings
+[JsonSourceGenerationOptions(
+    PropertyNameCaseInsensitive = true,
+    ReadCommentHandling = JsonCommentHandling.Skip,
+    AllowTrailingCommas = true)]
+[JsonSerializable(typeof(AppSettings))]
+internal partial class AppSettingsContext : JsonSerializerContext
+{
+}
+
 public sealed class AppSettings
 {
     // ── USB device ────────────────────────────────────────────────────────
@@ -57,8 +67,8 @@ public sealed class AppSettings
         }
         try
         {
-            var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(path), opts)
+            // Use the AOT-safe generated context instead of generic reflection
+            return JsonSerializer.Deserialize(File.ReadAllText(path), AppSettingsContext.Default.AppSettings)
                    ?? new AppSettings();
         }
         catch (Exception ex)
