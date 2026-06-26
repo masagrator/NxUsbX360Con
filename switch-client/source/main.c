@@ -1,5 +1,5 @@
 /*
- * NxUsbX360Con  v1.0.0
+ * SwitchInputClient  v1.0.0
  * ──────────────────────────────────────────────────────────────────────────
  * Nintendo Switch homebrew that reads the default gamepad and streams
  * 18-byte input packets over USB to a connected Windows PC.
@@ -78,7 +78,7 @@ static void draw_header(void)
 {
     printf("\033[2J\033[H"); /* clear + home */
     printf("--------------------------------------------\n");
-    printf("|      NxUsbX360Con   v1.0.0               |\n");
+    printf("|      SwitchInputClient   v1.0.0          |\n");
     printf("|      USB -> XInput Bridge                |\n");
     printf("--------------------------------------------\n\n");
 }
@@ -159,6 +159,25 @@ int main(int argc, char *argv[])
 
         /* Graceful exit on [+] */
         if ((held & 0b1111000000001111) == 0b1111000000001111) break;
+        static bool backlightOff = false;
+        static uint64_t lastTick = 0;
+        if (held & HidNpadButton_Plus) {
+            if (!lastTick) lastTick = svcGetSystemTick();
+            if ((svcGetSystemTick() - lastTick) > 19200000 * 3) {
+                lblInitialize();
+                if (backlightOff == false) {
+                    lblSwitchBacklightOff(0);
+                    backlightOff = true;
+                }
+                else {
+                    lblSwitchBacklightOn(0);
+                    backlightOff = false;
+                }
+                lblExit();
+                lastTick = 0;
+            }
+        }
+        else lastTick = 0;
 
         /* Read analogue sticks */
         HidAnalogStickState ls = padGetStickPos(&pad, 0);
@@ -211,26 +230,6 @@ int main(int argc, char *argv[])
             appletSetMediaPlaybackState(false);
             initialized = true;
         }
-
-        static bool backlightOff = false;
-        static uint64_t lastTick = 0;
-        if (held & HidNpadButton_Plus) {
-            if (!lastTick) lastTick = svcGetSystemTick();
-            if ((svcGetSystemTick() - lastTick) > 19200000 * 3) {
-                lblInitialize();
-                if (backlightOff == false) {
-                    lblSwitchBacklightOff(0);
-                    backlightOff = true;
-                }
-                else {
-                    lblSwitchBacklightOn(0);
-                    backlightOff = false;
-                }
-                lblExit();
-                lastTick = 0;
-            }
-        }
-        else lastTick = 0;
 
         if (backlightOff == false) {
             consoleClear();
