@@ -7,6 +7,8 @@ Technically it should support also pro controller and any other controller that 
 
 Jailbroken Nintendo Switch is required.
 
+This tool was made mainly by Claude, I was fixing some additional bugs.
+
 ## How to use it:
 - If you didn't install libusbK driver before:
   - Download [Zadig](https://zadig.akeo.ie/)
