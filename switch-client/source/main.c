@@ -35,7 +35,7 @@
 #define POLL_NS      (1000000000LL / POLL_HZ)  /* ~8.33 ms */
 
 /* ── Packed packet struct ────────────────────────────────────────────────── */
-typedef struct __attribute__((packed)) {
+typedef struct NX_PACKED {
     uint8_t  magic[2];
     uint8_t  version;
     uint8_t  reserved;
