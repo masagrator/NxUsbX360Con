@@ -25,7 +25,7 @@ This tool was made mainly by Claude, I was fixing some additional bugs.
 - If you get in green color `[USB] Connected  VID=0x057E  PID=0x3000  EP=0x81`, it means it works.
 
 ## Additional informations
-- Homebrew and server have code for reconnecting implemented, but it's finnicky, so you may need to restart homebrew/server to reeastibilish connection in case of closing server/homebrew and/or disconnecting USB while homebrew is running
+- Homebrew and server have code for reconnecting implemented, but it's finnicky, so you may need to restart homebrew/server to reestabilish connection in case of closing server/homebrew and/or disconnecting USB while homebrew is running
 - When connection is estabilished, Home menu button is disabled. To exit, press at once all D-Pad buttons + A + B + X + Y
 
 ## Additional functionalities
