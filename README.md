@@ -29,5 +29,5 @@ This tool was made mainly by Claude, I was fixing some additional bugs.
 - When connection is estabilished, Home menu button is disabled. To exit, press at once all D-Pad buttons + A + B + X + Y
 
 ## Additional functionalities
-- If you want to use it in game that has Nintendo Pro Controller input layout support, you may change in "appsettings.json" `SwapABXY` to "true", then you will get input matching shown buttons
+- If you want to use it in game that has Nintendo Pro Controller input layout support, you may change in "appsettings.json" `SwapABXY` to "true" before launching executable, then you will get input matching shown buttons
 - Homebrew by default is sending packages in refresh rate matching display vsync. By pressing + for 3 seconds you can disable backlight and refresh rate of sending usb packages will increase to 66.66 Hz matching joycon input refresh rate
