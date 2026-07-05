@@ -77,28 +77,56 @@ public sealed class UsbInputReader : IDisposable
         _ctx = new UsbContext();
         _dev = null;
 
-        foreach (var candidate in _ctx.List())
+        // FIX #1: Collect the full device list first so we can dispose every
+        // non-selected entry. IUsbDevice wraps a ref-counted libusb_device*;
+        // abandoning those references without calling Dispose() leaks the
+        // native handles. Over many reconnect cycles this exhausts the OS
+        // USB device table and is the root cause of the long-running failures.
+        var allDevices = _ctx.List().ToList();
+
+        try
         {
-            if (candidate.VendorId == _cfg.VendorId && candidate.ProductId == _cfg.ProductId)
+            foreach (var candidate in allDevices)
             {
+                if (candidate.VendorId != _cfg.VendorId || candidate.ProductId != _cfg.ProductId)
+                    continue;
+
                 try
                 {
-                    // Attempt to fully open and claim it. 
-                    // If this is a stale OS "ghost" handle, it will throw an exception here.
+                    // Attempt to fully open and claim it.
+                    // If this is a stale OS "ghost" handle it will throw here.
                     candidate.Open();
                     candidate.ClaimInterface(_cfg.InterfaceNumber);
 
-                    _dev = candidate;
-                    _reader = _dev.OpenEndpointReader((ReadEndpointID)_cfg.ReadEndpointAddress);
-                    
-                    break; // Success! We found the real, active device.
+                    // FIX #2: Assign _dev only AFTER OpenEndpointReader succeeds.
+                    // Previously _dev was set before the call, so a failure left
+                    // _dev pointing at a closed device while _reader stayed null.
+                    // The subsequent ReadLoopAsync then hit a null-dereference on
+                    // _reader!.Read(), which manifested as a spurious reconnect loop
+                    // rather than a clear error.
+                    var reader = candidate.OpenEndpointReader((ReadEndpointID)_cfg.ReadEndpointAddress);
+                    _dev    = candidate;
+                    _reader = reader;
+                    break; // Success — leave this device out of the dispose loop below.
                 }
                 catch
                 {
-                    // It's a ghost device or access denied. Clean up and try the next match.
+                    // Ghost device or access denied. Clean up and try the next match.
                     try { candidate.ReleaseInterface(_cfg.InterfaceNumber); } catch { }
-                    try { candidate.Close(); } catch { }
+                    try { candidate.Close();                                } catch { }
+                    // candidate stays in allDevices and will be disposed in the
+                    // finally block below together with all other non-selected entries.
                 }
+            }
+        }
+        finally
+        {
+            // FIX #1 (continued): Dispose every device that we did NOT select.
+            // This releases the libusb_device* reference for each one.
+            foreach (var candidate in allDevices)
+            {
+                if (!ReferenceEquals(candidate, _dev))
+                    try { (candidate as IDisposable)?.Dispose(); } catch { }
             }
         }
 
@@ -127,21 +155,36 @@ public sealed class UsbInputReader : IDisposable
 
             if (code == 0 && bytesRead == InputPacket.Size)
             {
-                consecutiveEmptyReads = 0; // Reset counter on valid packet
-                
+                consecutiveEmptyReads = 0;
+
                 var pkt = InputPacket.TryParse(buf);
                 if (pkt.HasValue)
                     PacketReceived?.Invoke(this, new PacketReceivedEventArgs(pkt.Value));
             }
             else if (code == -7 || bytesRead == 0)
             {
-                // Abort if the driver is NAKing continuously (approx 2 seconds at 7ms poll rate)
+                // Timeout / NAK — device is present but silent.
+                // Abort if NAKing continuously for ~2 s at 7 ms poll rate.
                 consecutiveEmptyReads++;
-                if (consecutiveEmptyReads > 300) 
-                {
+                if (consecutiveEmptyReads > 300)
                     throw new IOException("Device stopped responding (continuous timeouts).");
-                }
                 await Task.Yield();
+            }
+            else if (code == 0 && bytesRead > 0)
+            {
+                // FIX #3: Short (partial) frame — code is success (0) but fewer
+                // bytes arrived than the expected 18-byte packet size.
+                // Previously this case fell through ALL branches silently:
+                //   - the "valid packet" branch requires bytesRead == InputPacket.Size
+                //   - the "timeout" branch requires code == -7 || bytesRead == 0
+                // Neither matched, so the counter was never reset. A burst of
+                // fragmented USB frames would accumulate until hitting the 300-read
+                // threshold, triggering a forced disconnect — the "not accepting
+                // certain data" symptom. Log and reset the idle counter so a
+                // partial read doesn't penalise the timeout watchdog.
+                consecutiveEmptyReads = 0;
+                if (_cfg.Verbose)
+                    Console.WriteLine($"[USB] Short frame: expected {InputPacket.Size} B, got {bytesRead} B — discarding.");
             }
             else if (code == -4)
             {
@@ -156,7 +199,10 @@ public sealed class UsbInputReader : IDisposable
 
     private void Disconnect()
     {
-        _reader = null;   // UsbEndpointReader has no Dispose() in LibUsbDotNet 3.x
+        // LibUsbDotNet 3.x: UsbEndpointReader does not implement IDisposable,
+        // but try anyway so future library upgrades that add Dispose() work for free.
+        try { (_reader as IDisposable)?.Dispose(); } catch { }
+        _reader = null;
 
         if (_dev is not null)
         {

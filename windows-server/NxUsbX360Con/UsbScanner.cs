@@ -74,9 +74,11 @@ public static class UsbScanner
         // IUsbDevice in LibUsbDotNet 3.x does not expose Manufacturer / Product
         // as plain string properties.  We attempt to open and call GetStringDescriptor
         // if the method exists (it may not in all builds), otherwise skip gracefully.
+        bool opened = false;
         try
         {
             dev.Open();
+            opened = true;
 
             // Try reflection approach: some 3.x builds expose Info property
             // that carries descriptor strings — try a dynamic lookup so we don't
@@ -97,12 +99,18 @@ public static class UsbScanner
                         Console.WriteLine($"         Product      : {prd}");
                 }
             }
-
-            dev.Close();
         }
         catch
         {
             // Device needs a driver or access was denied — skip strings silently.
+        }
+        finally
+        {
+            // FIX #7: Always close the device, even if the reflection code throws.
+            // Previously, a successful Open() followed by a reflection exception
+            // left the device handle open for the lifetime of the scan context.
+            if (opened)
+                try { dev.Close(); } catch { }
         }
     }
 }

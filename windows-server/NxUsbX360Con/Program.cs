@@ -48,7 +48,9 @@ Console.CancelKeyPress += (_, e) =>
 // ── Run ───────────────────────────────────────────────────────────────────
 try
 {
-    var server = new InputServer(config);
+    // FIX #6: InputServer implements IDisposable — use `using` so _vigem is
+    // always cleaned up even if RunAsync exits via an unexpected path.
+    using var server = new InputServer(config);
     await server.RunAsync(cts.Token);
     Console.WriteLine("[Main] Server stopped cleanly.");
     return 0;

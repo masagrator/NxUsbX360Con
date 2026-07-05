@@ -40,13 +40,16 @@ public sealed class InputServer : IDisposable
     private InputPacket? _lastPkt;
     private string       _statusLabel = "WAITING";
 
+    // FIX #4: Reuse a single StringBuilder instead of allocating one per
+    // ForceRedraw() call. At up to 30 Hz this created significant GC pressure.
+    private readonly System.Text.StringBuilder _btnBuf = new(64);
+
     public InputServer(AppSettings cfg) => _cfg = cfg;
 
     // ── Public API ────────────────────────────────────────────────────────
 
     public async Task RunAsync(CancellationToken ct)
     {
-
         using var usb = new UsbInputReader(_cfg);
         usb.Connected      += OnConnected;
         usb.PacketReceived += OnPacketReceived;
@@ -54,7 +57,17 @@ public sealed class InputServer : IDisposable
 
         ForceRedraw();
 
-        await usb.RunAsync(ct);
+        try
+        {
+            await usb.RunAsync(ct);
+        }
+        finally
+        {
+            // Unsubscribe to release delegate references before usb is disposed.
+            usb.Connected      -= OnConnected;
+            usb.PacketReceived -= OnPacketReceived;
+            usb.Disconnected   -= OnDisconnected;
+        }
     }
 
     // ── USB event handlers ────────────────────────────────────────────────
@@ -110,26 +123,6 @@ public sealed class InputServer : IDisposable
     }
 
     // ── Display ───────────────────────────────────────────────────────────
-
-    private void PrintBanner()
-    {
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("╔══════════════════════════════════════════════════╗");
-        Console.WriteLine("║       SwitchInputServer  v1.0.0                  ║");
-        Console.WriteLine("║   Nintendo Switch  ──USB──►  Xbox 360 (ViGEm)   ║");
-        Console.WriteLine("╚══════════════════════════════════════════════════╝");
-        Console.ResetColor();
-        Console.WriteLine();
-        Console.WriteLine(
-            $"  VID=0x{_cfg.VendorId:X4}  PID=0x{_cfg.ProductId:X4}  " +
-            $"EP=0x{_cfg.ReadEndpointAddress:X2}  " +
-            $"Poll={_cfg.UsbReadTimeoutMs} ms  " +
-            $"SwapABXY={_cfg.SwapABXY}");
-        Console.WriteLine();
-        Console.WriteLine("  --scan to list USB devices   |   Ctrl+C to exit");
-        Console.WriteLine();
-    }
 
     private void ForceRedraw()
     {
@@ -204,6 +197,26 @@ public sealed class InputServer : IDisposable
         }
     }
 
+    private void PrintBanner()
+    {
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("╔══════════════════════════════════════════════════╗");
+        Console.WriteLine("║       SwitchInputServer  v1.0.0                  ║");
+        Console.WriteLine("║   Nintendo Switch  ──USB──►  Xbox 360 (ViGEm)   ║");
+        Console.WriteLine("╚══════════════════════════════════════════════════╝");
+        Console.ResetColor();
+        Console.WriteLine();
+        Console.WriteLine(
+            $"  VID=0x{_cfg.VendorId:X4}  PID=0x{_cfg.ProductId:X4}  " +
+            $"EP=0x{_cfg.ReadEndpointAddress:X2}  " +
+            $"Poll={_cfg.UsbReadTimeoutMs} ms  " +
+            $"SwapABXY={_cfg.SwapABXY}");
+        Console.WriteLine();
+        Console.WriteLine("  --scan to list USB devices   |   Ctrl+C to exit");
+        Console.WriteLine();
+    }
+
     /// <summary>Print line padded to <see cref="StatusW"/> to overwrite old content.</summary>
     private static void SLn(string text)
     {
@@ -214,12 +227,14 @@ public sealed class InputServer : IDisposable
         Console.WriteLine(text);
     }
 
-    private static string BuildButtonStr(uint b)
+    private string BuildButtonStr(uint b)
     {
-        var parts = new System.Text.StringBuilder();
+        // FIX #4: Reuse _btnBuf instead of allocating a new StringBuilder each call.
+        _btnBuf.Clear();
+
         void Add(uint flag, string name)
         {
-            if ((b & flag) != 0) { if (parts.Length > 0) parts.Append(' '); parts.Append(name); }
+            if ((b & flag) != 0) { if (_btnBuf.Length > 0) _btnBuf.Append(' '); _btnBuf.Append(name); }
         }
         Add(SwitchButton.A,         "A");
         Add(SwitchButton.B,         "B");
@@ -237,7 +252,7 @@ public sealed class InputServer : IDisposable
         Add(SwitchButton.DPadDown,  "DD");
         Add(SwitchButton.DPadLeft,  "DL");
         Add(SwitchButton.DPadRight, "DR");
-        return parts.Length > 0 ? parts.ToString() : "(none)";
+        return _btnBuf.Length > 0 ? _btnBuf.ToString() : "(none)";
     }
 
     public void Dispose()
