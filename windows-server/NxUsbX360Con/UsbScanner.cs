@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace SwitchInputServer;
 
 /// <summary>
@@ -66,6 +68,7 @@ public static class UsbScanner
 
     // ── Helpers ──────────────────────────────────────────────────────────
 
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection failures are caught and handled gracefully without crashing.")]
     private static void TryPrintStrings(IUsbDevice dev)
     {
         // IUsbDevice in LibUsbDotNet 3.x does not expose Manufacturer / Product
@@ -75,7 +78,6 @@ public static class UsbScanner
         {
             dev.Open();
 
-#pragma warning disable IL2075 // Suppress trim warnings: failures are handled gracefully
             // Try reflection approach: some 3.x builds expose Info property
             // that carries descriptor strings — try a dynamic lookup so we don't
             // get a hard compile error if the member doesn't exist in this build.
@@ -95,7 +97,6 @@ public static class UsbScanner
                         Console.WriteLine($"         Product      : {prd}");
                 }
             }
-#pragma warning restore IL2075
 
             dev.Close();
         }

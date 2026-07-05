@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0-windows</TargetFramework>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <OutputType>Exe</OutputType>
     <AssemblyName>NxUsbX360Con</AssemblyName>
     <RootNamespace>NxUsbX360Con</RootNamespace>
@@ -10,7 +9,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>13.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Platforms>x64</Platforms>
+    <Platforms>x64;AnyCPU;ARM64</Platforms>
     <Optimize Condition="'$(Configuration)'=='Release'">true</Optimize>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <Version>1.0.0</Version>
@@ -19,6 +18,7 @@
 	<PublishAot>true</PublishAot>
 	<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
 	<JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+	<NoWarn>$(NoWarn);IL2104</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -47,15 +47,9 @@
       <_LibUsbDst>$(OutputPath)libusb-1.0.dll</_LibUsbDst>
     </PropertyGroup>
 
-    <Copy
-      SourceFiles="$(_LibUsbSrc)"
-      DestinationFiles="$(_LibUsbDst)"
-      SkipUnchangedFiles="true"
-      Condition="Exists('$(_LibUsbSrc)')" />
+    <Copy SourceFiles="$(_LibUsbSrc)" DestinationFiles="$(_LibUsbDst)" SkipUnchangedFiles="true" Condition="Exists('$(_LibUsbSrc)')" />
 
-    <Warning
-      Condition="!Exists('$(_LibUsbSrc)')"
-      Text="libusb-1.0.dll not found at $(_LibUsbSrc) — run 'dotnet restore' first, then rebuild." />
+    <Warning Condition="!Exists('$(_LibUsbSrc)')" Text="libusb-1.0.dll not found at $(_LibUsbSrc) — run 'dotnet restore' first, then rebuild." />
   </Target>
   
 

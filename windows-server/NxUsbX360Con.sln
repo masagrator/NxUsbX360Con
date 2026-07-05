@@ -1,18 +1,29 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113
+# Visual Studio Version 18
+VisualStudioVersion = 18.8.11918.235
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NxUsbX360Con", "NxUsbX360Con\NxUsbX360Con.csproj", "{A2B3C4D5-E6F7-8901-BCDE-F01234567890}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM64 = Debug|ARM64
 		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|ARM64 = Release|ARM64
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2B3C4D5-E6F7-8901-BCDE-F01234567890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2B3C4D5-E6F7-8901-BCDE-F01234567890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2B3C4D5-E6F7-8901-BCDE-F01234567890}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{A2B3C4D5-E6F7-8901-BCDE-F01234567890}.Debug|ARM64.Build.0 = Debug|ARM64
 		{A2B3C4D5-E6F7-8901-BCDE-F01234567890}.Debug|x64.ActiveCfg = Debug|x64
 		{A2B3C4D5-E6F7-8901-BCDE-F01234567890}.Debug|x64.Build.0 = Debug|x64
+		{A2B3C4D5-E6F7-8901-BCDE-F01234567890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2B3C4D5-E6F7-8901-BCDE-F01234567890}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2B3C4D5-E6F7-8901-BCDE-F01234567890}.Release|ARM64.ActiveCfg = Release|ARM64
+		{A2B3C4D5-E6F7-8901-BCDE-F01234567890}.Release|ARM64.Build.0 = Release|ARM64
 		{A2B3C4D5-E6F7-8901-BCDE-F01234567890}.Release|x64.ActiveCfg = Release|x64
 		{A2B3C4D5-E6F7-8901-BCDE-F01234567890}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
