@@ -75,7 +75,8 @@ public static class UsbScanner
         {
             dev.Open();
 
-            // Try reflection-free approach: some 3.x builds expose Info property
+#pragma warning disable IL2075 // Suppress trim warnings: failures are handled gracefully
+            // Try reflection approach: some 3.x builds expose Info property
             // that carries descriptor strings — try a dynamic lookup so we don't
             // get a hard compile error if the member doesn't exist in this build.
             var infoProperty = dev.GetType().GetProperty("Info");
@@ -94,6 +95,7 @@ public static class UsbScanner
                         Console.WriteLine($"         Product      : {prd}");
                 }
             }
+#pragma warning restore IL2075
 
             dev.Close();
         }
